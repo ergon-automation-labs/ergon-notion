@@ -6,10 +6,4 @@ ExUnit.start()
 
 # Define Mox mocks for external dependencies
 Mox.defmock(HTTPClientMock, for: BotArmyNotion.HTTPClient)
-
-# Try to set up database sandbox, but don't fail if database is unavailable
-try do
-  Ecto.Adapters.SQL.Sandbox.mode(BotArmyNotion.Repo, :manual)
-rescue
-  _ -> :ok
-end
+Mox.defmock(BotArmyNotion.NotionMock, for: BotArmyNotion.Notion)

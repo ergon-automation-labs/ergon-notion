@@ -21,20 +21,11 @@ defmodule BotArmyNotion.Application do
 
     children =
       []
-      |> maybe_add_repo()
       |> maybe_add_pulse_publisher()
-      |> maybe_add_workers()
+      |> maybe_add_consumer()
 
     opts = [strategy: :one_for_one, name: BotArmyNotion.Supervisor]
     Supervisor.start_link(children, opts)
-  end
-
-  defp maybe_add_repo(children) do
-    if @env == :test do
-      children
-    else
-      [{BotArmyNotion.Repo, []} | children]
-    end
   end
 
   defp maybe_add_pulse_publisher(children) do
@@ -45,14 +36,11 @@ defmodule BotArmyNotion.Application do
     end
   end
 
-  defp maybe_add_workers(children) do
+  defp maybe_add_consumer(children) do
     if @env == :test do
       children
     else
-      # Bot-specific workers and pollers go here (GenServers that do async work)
-      # Examples: Scheduler, Poller, Watcher
-      # Pattern: gated with if @env == :test to prevent long-running processes in test
-      children
+      [{BotArmyNotion.NATS.Consumer, []} | children]
     end
   end
 end
