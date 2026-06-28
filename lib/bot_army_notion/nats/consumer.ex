@@ -65,18 +65,7 @@ defmodule BotArmyNotion.NATS.Consumer do
         Logger.info("[Notion] Connected to NATS, subscribing to topics")
 
         subscriptions =
-          @subject_strings
-          |> Enum.map(fn subject ->
-            case Gnat.sub(conn, self(), subject) do
-              {:ok, sub} ->
-                Logger.info("[Notion] Subscribed to #{subject}")
-                sub
-
-              {:error, reason} ->
-                Logger.error("[Notion] Failed to subscribe to #{subject}: #{inspect(reason)}")
-                nil
-            end
-          end)
+          subscribe_to_subjects(@subject_strings, conn)
           |> Enum.filter(&(not is_nil(&1)))
 
         BotArmyRuntime.Registry.register("notion", @subjects, @version)
@@ -187,4 +176,18 @@ defmodule BotArmyNotion.NATS.Consumer do
 
   defp default_client,
     do: Application.get_env(:bot_army_notion, :notion_client, BotArmyNotion.Notion.API)
+
+  defp subscribe_to_subjects(subjects, conn) do
+    Enum.map(subjects, fn subject ->
+      case Gnat.sub(conn, self(), subject) do
+        {:ok, sub} ->
+          Logger.info("[Notion] Subscribed to #{subject}")
+          sub
+
+        {:error, reason} ->
+          Logger.error("[Notion] Failed to subscribe to #{subject}: #{inspect(reason)}")
+          nil
+      end
+    end)
+  end
 end

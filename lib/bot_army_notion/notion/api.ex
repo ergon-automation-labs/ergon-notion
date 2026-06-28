@@ -70,16 +70,22 @@ defmodule BotArmyNotion.Notion.API do
   end
 
   defp attach_children(blocks, depth) do
-    Enum.map(blocks, fn block ->
-      if block["has_children"] && depth > 0 do
-        case get_block_tree(block["id"], depth - 1) do
-          {:ok, sub} -> Map.put(block, "children", sub)
-          _ -> block
-        end
-      else
-        block
-      end
-    end)
+    Enum.map(blocks, &maybe_attach_child(&1, depth))
+  end
+
+  defp maybe_attach_child(block, depth) when is_map(block) and is_integer(depth) do
+    if block["has_children"] && depth > 0 do
+      attach_child_tree(block, depth)
+    else
+      block
+    end
+  end
+
+  defp attach_child_tree(block, depth) do
+    case get_block_tree(block["id"], depth - 1) do
+      {:ok, sub} -> Map.put(block, "children", sub)
+      _ -> block
+    end
   end
 
   # ---------------------------------------------------------------------------
