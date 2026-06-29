@@ -8,6 +8,9 @@ defmodule BotArmyNotion.MixProject do
       elixir: "~> 1.14",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
+      dialyzer: [
+        flags: [:underspecs]
+      ],
       releases: [
         notion_bot: [
           applications: [bot_army_notion: :permanent]
